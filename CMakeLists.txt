@@ -19,3 +19,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(benchmark)
 # Then link your target against benchmark::benchmark and benchmark::benchmark_main if needed?
 target_link_libraries(cpp-simd-post PRIVATE benchmark::benchmark benchmark::benchmark_main)
+
+# Link Accelerate framework on macOS for AMX support
+if(APPLE)
+    target_link_libraries(cpp-simd-post PRIVATE "-framework Accelerate")
+    target_compile_definitions(cpp-simd-post PRIVATE ACCELERATE_NEW_LAPACK)
+endif()
