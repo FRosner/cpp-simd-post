@@ -1,4 +1,4 @@
-#include <vector>
+#include "blas_simple.h"
 
 // Simple BLAS operation: vector dot product (DDOT)
 double ddot_simple(const std::vector<double> &x, const std::vector<double> &y) {

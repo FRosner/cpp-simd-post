@@ -6,7 +6,8 @@ include(FetchContent)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(cpp-simd-post main.cpp)
+file(GLOB SOURCES CONFIGURE_DEPENDS "*.cpp")
+add_executable(cpp-simd-post ${SOURCES})
 
 # Google Benchmark
 set(BENCHMARK_DOWNLOAD_DEPENDENCIES ON CACHE BOOL "" FORCE)
