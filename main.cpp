@@ -1,24 +1,20 @@
-#include <iostream>
+// main_benchmark.cpp
+
+#include "blas_simple.cpp"
+#include <benchmark/benchmark.h>
 #include <vector>
 
-void axpy(int n, float alpha, const std::vector<float>& x, std::vector<float>& y) {
-    for (int i = 0; i < n; ++i) {
-        y[i] = alpha * x[i] + y[i];
+static void BM_DdotSimple(benchmark::State& state) {
+    size_t n = state.range(0);
+    std::vector<double> x(n, 1.0);
+    std::vector<double> y(n, 2.0);
+    for (auto _ : state) {
+        // Measure dot product performance
+        benchmark::DoNotOptimize(ddot_simple(x, y));
     }
+    state.SetItemsProcessed(state.iterations() * n);
 }
 
-int main() {
-    std::vector<float> x = {1.0, 2.0, 3.0};
-    std::vector<float> y = {4.0, 5.0, 6.0};
-    float alpha = 2.0;
-    int n = x.size();
+BENCHMARK(BM_DdotSimple)->RangeMultiplier(10)->Range(1<<10, 1<<20);
 
-    axpy(n, alpha, x, y);
-
-    for (float val : y) {
-        std::cout << val << " ";
-    }
-    std::cout << std::endl;
-
-    return 0;
-}
+BENCHMARK_MAIN();
