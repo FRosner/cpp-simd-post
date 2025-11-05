@@ -23,7 +23,7 @@ static void BM_DdotNeon(benchmark::State& state) {
     std::vector<double> y(n, 2.0);
     for (auto _ : state) {
         // Measure SIMD-accelerated dot product performance
-        benchmark::DoNotOptimize(ddot_neon(x, y));
+        benchmark::DoNotOptimize(ddot_neon_optimized(x, y));
     }
     state.SetItemsProcessed(state.iterations() * n);
 }
