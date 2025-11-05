@@ -6,23 +6,11 @@ include(FetchContent)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# BLAS backend selection (must be before source collection)
 option(USE_ACCELERATE "Use Apple Accelerate framework (macOS only)" ON)
 option(USE_OPENBLAS "Use OpenBLAS" OFF)
 
-# Collect source files, excluding BLAS implementations initially
+# Collect source files (BLAS implementations are now in main.cpp)
 file(GLOB SOURCES CONFIGURE_DEPENDS "*.cpp")
-list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/blas_openblas.cpp")
-list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/blas_accelerate.cpp")
-
-# Add back only the enabled BLAS implementations
-if(USE_ACCELERATE AND APPLE)
-    list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/blas_accelerate.cpp")
-endif()
-
-if(USE_OPENBLAS)
-    list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/blas_openblas.cpp")
-endif()
 
 add_executable(cpp-simd-post ${SOURCES})
 
