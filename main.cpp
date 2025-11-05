@@ -1,46 +1,45 @@
 // main_benchmark.cpp
 
-#include "blas_simple.h"
-#include "blas_neon.h"
-#include "blas_amx.h"
+#ifdef USE_ACCELERATE
+#include "blas_accelerate.h"
+#endif
+#ifdef USE_OPENBLAS
+#include "blas_openblas.h"
+#endif
 #include <benchmark/benchmark.h>
 #include <vector>
 
-static void BM_DdotSimple(benchmark::State& state) {
+#ifdef USE_ACCELERATE
+static void BM_DdotAccelerate(benchmark::State& state) {
     size_t n = state.range(0);
     std::vector<double> x(n, 1.0);
     std::vector<double> y(n, 2.0);
     for (auto _ : state) {
-        // Measure dot product performance
-        benchmark::DoNotOptimize(ddot_simple(x, y));
+        // Measure AMX-accelerated dot product performance (Apple Accelerate)
+        benchmark::DoNotOptimize(ddot_accelerate(x, y));
     }
     state.SetItemsProcessed(state.iterations() * n);
 }
+#endif
 
-static void BM_DdotNeon(benchmark::State& state) {
+#ifdef USE_OPENBLAS
+static void BM_DdotOpenBLAS(benchmark::State& state) {
     size_t n = state.range(0);
     std::vector<double> x(n, 1.0);
     std::vector<double> y(n, 2.0);
     for (auto _ : state) {
-        // Measure SIMD-accelerated dot product performance
-        benchmark::DoNotOptimize(ddot_neon_optimized(x, y));
+        // Measure OpenBLAS dot product performance
+        benchmark::DoNotOptimize(ddot_openblas(x, y));
     }
     state.SetItemsProcessed(state.iterations() * n);
 }
+#endif
 
-static void BM_DdotAmx(benchmark::State& state) {
-    size_t n = state.range(0);
-    std::vector<double> x(n, 1.0);
-    std::vector<double> y(n, 2.0);
-    for (auto _ : state) {
-        // Measure AMX-accelerated dot product performance
-        benchmark::DoNotOptimize(ddot_amx(x, y));
-    }
-    state.SetItemsProcessed(state.iterations() * n);
-}
-
-BENCHMARK(BM_DdotSimple)->RangeMultiplier(8)->Range(1<<10, 1<<20);
-BENCHMARK(BM_DdotNeon)->RangeMultiplier(8)->Range(1<<10, 1<<20);
-BENCHMARK(BM_DdotAmx)->RangeMultiplier(8)->Range(1<<10, 1<<20);
+#ifdef USE_ACCELERATE
+BENCHMARK(BM_DdotAccelerate)->RangeMultiplier(2)->Range(1<<10, 1<<22);
+#endif
+#ifdef USE_OPENBLAS
+BENCHMARK(BM_DdotOpenBLAS)->RangeMultiplier(2)->Range(1<<10, 1<<22);
+#endif
 
 BENCHMARK_MAIN();

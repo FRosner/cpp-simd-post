@@ -6,7 +6,24 @@ include(FetchContent)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# BLAS backend selection (must be before source collection)
+option(USE_ACCELERATE "Use Apple Accelerate framework (macOS only)" ON)
+option(USE_OPENBLAS "Use OpenBLAS" OFF)
+
+# Collect source files, excluding BLAS implementations initially
 file(GLOB SOURCES CONFIGURE_DEPENDS "*.cpp")
+list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/blas_openblas.cpp")
+list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/blas_accelerate.cpp")
+
+# Add back only the enabled BLAS implementations
+if(USE_ACCELERATE AND APPLE)
+    list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/blas_accelerate.cpp")
+endif()
+
+if(USE_OPENBLAS)
+    list(APPEND SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/blas_openblas.cpp")
+endif()
+
 add_executable(cpp-simd-post ${SOURCES})
 
 # Google Benchmark
@@ -21,7 +38,43 @@ FetchContent_MakeAvailable(benchmark)
 target_link_libraries(cpp-simd-post PRIVATE benchmark::benchmark benchmark::benchmark_main)
 
 # Link Accelerate framework on macOS for AMX support
-if(APPLE)
+if(USE_ACCELERATE AND APPLE)
     target_link_libraries(cpp-simd-post PRIVATE "-framework Accelerate")
-    target_compile_definitions(cpp-simd-post PRIVATE ACCELERATE_NEW_LAPACK)
+    target_compile_definitions(cpp-simd-post PRIVATE ACCELERATE_NEW_LAPACK USE_ACCELERATE)
+    message(STATUS "Using Apple Accelerate framework for BLAS")
+endif()
+
+# OpenBLAS
+if(USE_OPENBLAS)
+    # On macOS with Homebrew, OpenBLAS is keg-only and not symlinked
+    if(APPLE)
+        # Try to find Homebrew's OpenBLAS installation
+        execute_process(
+            COMMAND brew --prefix openblas
+            OUTPUT_VARIABLE OPENBLAS_PREFIX
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+        if(OPENBLAS_PREFIX)
+            list(APPEND CMAKE_PREFIX_PATH "${OPENBLAS_PREFIX}")
+            set(OPENBLAS_INCLUDE_DIR "${OPENBLAS_PREFIX}/include")
+            set(OPENBLAS_LIB_DIR "${OPENBLAS_PREFIX}/lib")
+            message(STATUS "Found Homebrew OpenBLAS at: ${OPENBLAS_PREFIX}")
+        endif()
+    endif()
+
+    set(BLA_VENDOR OpenBLAS)
+    find_package(BLAS REQUIRED)
+    target_link_libraries(cpp-simd-post PRIVATE ${BLAS_LIBRARIES})
+
+    # Explicitly add OpenBLAS include directory
+    if(OPENBLAS_INCLUDE_DIR)
+        target_include_directories(cpp-simd-post PRIVATE ${OPENBLAS_INCLUDE_DIR})
+        message(STATUS "OpenBLAS include directory: ${OPENBLAS_INCLUDE_DIR}")
+    elseif(BLAS_INCLUDE_DIRS)
+        target_include_directories(cpp-simd-post PRIVATE ${BLAS_INCLUDE_DIRS})
+    endif()
+
+    target_compile_definitions(cpp-simd-post PRIVATE USE_OPENBLAS)
+    message(STATUS "Using OpenBLAS for BLAS")
 endif()
