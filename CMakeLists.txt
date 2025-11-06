@@ -6,15 +6,13 @@ include(FetchContent)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(USE_ACCELERATE "Use Apple Accelerate framework (macOS only)" ON)
-option(USE_OPENBLAS "Use OpenBLAS" OFF)
+option(BUILD_ACCELERATE "Build binary with Apple Accelerate framework (macOS only)" ON)
+option(BUILD_OPENBLAS "Build binary with OpenBLAS" ON)
 
 # Collect source files (BLAS implementations are now in main.cpp)
 file(GLOB SOURCES CONFIGURE_DEPENDS "*.cpp")
 
-add_executable(cpp-simd-post ${SOURCES})
-
-# Google Benchmark
+# Google Benchmark (shared by both executables)
 set(BENCHMARK_DOWNLOAD_DEPENDENCIES ON CACHE BOOL "" FORCE)
 FetchContent_Declare(
         benchmark
@@ -22,26 +20,29 @@ FetchContent_Declare(
         GIT_TAG v1.9.4  # or the desired release tag
 )
 FetchContent_MakeAvailable(benchmark)
-# Then link your target against benchmark::benchmark and benchmark::benchmark_main if needed?
-target_link_libraries(cpp-simd-post PRIVATE benchmark::benchmark benchmark::benchmark_main)
 
-# Link Accelerate framework on macOS for AMX support
-if(USE_ACCELERATE AND APPLE)
-    target_link_libraries(cpp-simd-post PRIVATE "-framework Accelerate")
-    target_compile_definitions(cpp-simd-post PRIVATE ACCELERATE_NEW_LAPACK USE_ACCELERATE)
-    message(STATUS "Using Apple Accelerate framework for BLAS")
+# Build Accelerate version
+if(BUILD_ACCELERATE AND APPLE)
+    add_executable(cpp-simd-post-accelerate ${SOURCES})
+    target_link_libraries(cpp-simd-post-accelerate PRIVATE benchmark::benchmark benchmark::benchmark_main)
+    target_link_libraries(cpp-simd-post-accelerate PRIVATE "-framework Accelerate")
+    target_compile_definitions(cpp-simd-post-accelerate PRIVATE ACCELERATE_NEW_LAPACK USE_ACCELERATE)
+    message(STATUS "Building cpp-simd-post-accelerate with Apple Accelerate framework")
 endif()
 
-# OpenBLAS
-if(USE_OPENBLAS)
+# Build OpenBLAS version
+if(BUILD_OPENBLAS)
+    add_executable(cpp-simd-post-openblas ${SOURCES})
+    target_link_libraries(cpp-simd-post-openblas PRIVATE benchmark::benchmark benchmark::benchmark_main)
+
     # On macOS with Homebrew, OpenBLAS is keg-only and not symlinked
     if(APPLE)
         # Try to find Homebrew's OpenBLAS installation
         execute_process(
-            COMMAND brew --prefix openblas
-            OUTPUT_VARIABLE OPENBLAS_PREFIX
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            ERROR_QUIET
+                COMMAND brew --prefix openblas
+                OUTPUT_VARIABLE OPENBLAS_PREFIX
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                ERROR_QUIET
         )
         if(OPENBLAS_PREFIX)
             list(APPEND CMAKE_PREFIX_PATH "${OPENBLAS_PREFIX}")
@@ -53,16 +54,16 @@ if(USE_OPENBLAS)
 
     set(BLA_VENDOR OpenBLAS)
     find_package(BLAS REQUIRED)
-    target_link_libraries(cpp-simd-post PRIVATE ${BLAS_LIBRARIES})
+    target_link_libraries(cpp-simd-post-openblas PRIVATE ${BLAS_LIBRARIES})
 
     # Explicitly add OpenBLAS include directory
     if(OPENBLAS_INCLUDE_DIR)
-        target_include_directories(cpp-simd-post PRIVATE ${OPENBLAS_INCLUDE_DIR})
+        target_include_directories(cpp-simd-post-openblas PRIVATE ${OPENBLAS_INCLUDE_DIR})
         message(STATUS "OpenBLAS include directory: ${OPENBLAS_INCLUDE_DIR}")
     elseif(BLAS_INCLUDE_DIRS)
-        target_include_directories(cpp-simd-post PRIVATE ${BLAS_INCLUDE_DIRS})
+        target_include_directories(cpp-simd-post-openblas PRIVATE ${BLAS_INCLUDE_DIRS})
     endif()
 
-    target_compile_definitions(cpp-simd-post PRIVATE USE_OPENBLAS)
-    message(STATUS "Using OpenBLAS for BLAS")
+    target_compile_definitions(cpp-simd-post-openblas PRIVATE USE_OPENBLAS)
+    message(STATUS "Building cpp-simd-post-openblas with OpenBLAS")
 endif()
