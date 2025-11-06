@@ -66,3 +66,19 @@ Run the OpenBLAS version:
 ```
 
 This allows you to easily compare performance between the two BLAS implementations.
+
+## Debugging
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+```
+
+```bash
+lldb build/cpp-simd-post-accelerate
+
+break set -n blas_ddot
+run
+step
+
+```
