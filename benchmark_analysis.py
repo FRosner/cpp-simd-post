@@ -1,6 +1,7 @@
 import json
 import re
 import matplotlib.pyplot as plt
+import numpy as np
 from collections import defaultdict
 
 def parse_benchmark_name(name):
@@ -13,7 +14,6 @@ def parse_benchmark_name(name):
     size = int(match.group(3))
     return family, library, size
 
-# Usage (as before):
 with open("openblas.json", "r") as f:
     openblas_data = json.load(f)
 with open("accelerate.json", "r") as f:
@@ -34,26 +34,41 @@ for bm in benchmarks:
     })
 
 
-# Plotting per family, with one line per library
-for family, data in grouped.items():
-    # Organize data by library
-    data_by_library = defaultdict(list)
-    for entry in data:
-        data_by_library[entry["library"]].append((entry["size"], entry["items_per_second"]))
+def plot_data(y_label):
+    for family, data in grouped.items():
+        # Organize data by library
+        data_by_library = defaultdict(list)
+        for entry in data:
+            if y_label in entry:
+                data_by_library[entry["library"]].append((entry["size"], entry[y_label]))
 
-    plt.figure(figsize=(10,6))
-    for library, points in data_by_library.items():
-        # Sort points by size for a clean plot
-        points.sort(key=lambda x: x[0])
-        sizes, ips = zip(*points)
-        plt.plot(sizes, ips, marker='o', label=library)
+        if not data_by_library:
+            continue
 
-    plt.title(f"Benchmark Family: {family}")
-    plt.xlabel("Size")
-    plt.ylabel("Items per second")
-    plt.xscale("log")
-    plt.yscale("log")
-    plt.legend()
-    plt.grid(True, which="both", ls="--")
-    plt.tight_layout()
-    plt.show()
+        plt.figure(figsize=(10,6))
+        for library, points in data_by_library.items():
+            # Sort points by size for a clean plot
+            points.sort(key=lambda x: x[0])
+            sizes, ips = zip(*points)
+            plt.plot(sizes, ips, marker='o', label=library)
+
+        plt.title(f"Benchmark: {family}")
+        plt.xlabel("Size")
+        plt.ylabel(y_label.replace("_", " ").title())
+        plt.xscale('log', base=2)
+
+        all_sizes = [size for points in data_by_library.values() for size, _ in points]
+        min_size = min(all_sizes)
+        max_size = max(all_sizes)
+        min_exp = int(np.floor(np.log2(min_size)))
+        max_exp = int(np.ceil(np.log2(max_size)))
+        ticks = 2 ** np.arange(min_exp, max_exp + 1)
+        plt.xticks(ticks)
+
+        plt.legend()
+        plt.grid(True, which="both", ls="--")
+        plt.tight_layout()
+        plt.show()
+
+plot_data("items_per_second")
+plot_data("bytes_per_second")
