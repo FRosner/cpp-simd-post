@@ -68,7 +68,7 @@ def plot_data(y_label):
         plt.legend()
         plt.grid(True, which="both", ls="--")
         plt.tight_layout()
-        plt.show()
+        plt.savefig(f"plots/{family}_{y_label}_results.png", dpi=300)
 
 plot_data("items_per_second")
 plot_data("bytes_per_second")
