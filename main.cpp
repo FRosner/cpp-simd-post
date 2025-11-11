@@ -61,7 +61,7 @@ static void BM_Ddot_##backend_name(benchmark::State& state) { \
     } \
     state.SetItemsProcessed(state.iterations() * n); \
 } \
-BENCHMARK(BM_Ddot_##backend_name)->RangeMultiplier(2)->Range(1<<10, 1<<22);
+BENCHMARK(BM_Ddot_##backend_name)->RangeMultiplier(2)->Range(1<<1, 1<<22);
 
 #define BENCHMARK_DGEMM(backend_name) \
 static void BM_Dgemm_##backend_name(benchmark::State& state) { \
@@ -76,7 +76,7 @@ static void BM_Dgemm_##backend_name(benchmark::State& state) { \
     state.SetItemsProcessed(state.iterations() * 2 * n * n * n); \
     state.SetBytesProcessed(state.iterations() * 3 * n * n * sizeof(double)); \
 } \
-BENCHMARK(BM_Dgemm_##backend_name)->RangeMultiplier(2)->Range(1<<6, 1<<11);
+BENCHMARK(BM_Dgemm_##backend_name)->RangeMultiplier(2)->Range(1<<1, 1<<13);
 
 #define BENCHMARK_DGEMV(backend_name) \
 static void BM_Dgemv_##backend_name(benchmark::State& state) { \
@@ -91,7 +91,7 @@ static void BM_Dgemv_##backend_name(benchmark::State& state) { \
     state.SetItemsProcessed(state.iterations() * 2 * n * n); \
     state.SetBytesProcessed(state.iterations() * (n * n + 2 * n) * sizeof(double)); \
 } \
-BENCHMARK(BM_Dgemv_##backend_name)->RangeMultiplier(2)->Range(1<<6, 1<<13);
+BENCHMARK(BM_Dgemv_##backend_name)->RangeMultiplier(2)->Range(1<<1, 1<<13);
 
 #define BENCHMARK_DAXPY(backend_name) \
 static void BM_Daxpy_##backend_name(benchmark::State& state) { \
@@ -106,7 +106,7 @@ static void BM_Daxpy_##backend_name(benchmark::State& state) { \
     state.SetItemsProcessed(state.iterations() * n); \
     state.SetBytesProcessed(state.iterations() * 3 * n * sizeof(double)); \
 } \
-BENCHMARK(BM_Daxpy_##backend_name)->RangeMultiplier(2)->Range(1<<10, 1<<22);
+BENCHMARK(BM_Daxpy_##backend_name)->RangeMultiplier(2)->Range(1<<1, 1<<22);
 
 // Register benchmarks based on the selected backend
 #ifdef USE_ACCELERATE

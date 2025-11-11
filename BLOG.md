@@ -1,5 +1,5 @@
 ---
-title: Using Apple's Accelerate Framework for BLAS Operations
+title: Using Apple's Accelerate Framework for BLAS Routines
 published: false
 description: none 
 tags:  none
@@ -46,6 +46,16 @@ There are several CPU-based BLAS libraries, some of them developed by hardware m
 
 I was curious what the difference would be in terms of performance when comparing OpenBLAS and Accelerate on Apple Silicon. Since OpenBLAS does not support Apple's AMX instructions, relying on NEON instructions only, I expect it to be slower for most use cases.
 
+I built four benchmarks around some common double precision BLAS routines that are part of the C BLAS interface:
+
+- `cblas_daxpy` – *a · X + Y* is a level 1 routine that scales vector *X* by scalar *a* and adds it to vector *Y*. This routine is used in linear combination of vectors, common in iterative algorithms like conjugate gradient (CG) or generalized minimum residual (GMRES) for solving linear systems.
+- `cblas_ddot` - *X · Y* is a level 1 routine that computes the dot product of vectors *X* and *Y*. Dot products are widely used in machine learning, e.g. to compute similarities between vectors or phsysics simulations.
+- `cblas_dgemv` - _a · **A** · x + b · y_ is a level 2 routine that handles matrix-vector multiplication. _a_, _b_ are scalars, *x*, *y* are vectors, and _**A**_ is a matrix. This routine is also common in iterative algorithms, but also in machine learning (linear regression), and signal processing.
+- `cblas_dgemm` - _a · **A** · **B** + b · **C**_ is a level 3 routine that handles matrix-matrix multiplication. _a_, _b_ are scalars, and _**A**_, _**B**_, _**C**_ are matrices. This routine is common in machine learning and graphics processing, for example.
+
+The benchmarks use Google's [benchmark](https://github.com/google/benchmark) library to measure performance.
+
+
 ## Results
 
 ```bash
@@ -53,55 +63,14 @@ I was curious what the difference would be in terms of performance when comparin
 ./build/cpp-simd-post-accelerate --benchmark_out="accelerate.json"
 ```
 
+![daxpy benchmark results](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/sn4ypnz8yi5hv6pq09hc.png)
+![ddot benchmark results](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/lrb02axyd04mqpzadivl.png)
+![dgemm benchmark results](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/kijbe9iviaig6o9g1n4s.png)
+![dgemv benchmark results](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/u5j972ba5o6i4dy28hy0.png)
 
 ```
-Benchmark                        Time             CPU   Iterations UserCounters...
-----------------------------------------------------------------------------------
-BM_DdotOpenBLAS/1024           128 ns          128 ns      5475252 items_per_second=8.02053G/s
-BM_DdotOpenBLAS/2048           241 ns          241 ns      2883803 items_per_second=8.50361G/s
-BM_DdotOpenBLAS/4096           472 ns          472 ns      1477345 items_per_second=8.68423G/s
-BM_DdotOpenBLAS/8192          1181 ns         1181 ns       591661 items_per_second=6.93466G/s
-BM_DdotOpenBLAS/16384        45160 ns        14710 ns        45150 items_per_second=1.11381G/s
-BM_DdotOpenBLAS/32768        45610 ns        14417 ns        48982 items_per_second=2.27284G/s
-BM_DdotOpenBLAS/65536        46484 ns        14282 ns        47510 items_per_second=4.58866G/s
-BM_DdotOpenBLAS/131072       47354 ns        14556 ns        47857 items_per_second=9.00479G/s
-BM_DdotOpenBLAS/262144       51648 ns        17036 ns        39862 items_per_second=15.3875G/s
-BM_DdotOpenBLAS/524288       60265 ns        21181 ns        32832 items_per_second=24.7527G/s
-BM_DdotOpenBLAS/1048576      88170 ns        32628 ns        22805 items_per_second=32.1369G/s
-BM_DdotOpenBLAS/2097152     274591 ns       159403 ns         4416 items_per_second=13.1563G/s
-BM_DdotOpenBLAS/4194304     629821 ns       454093 ns         1535 items_per_second=9.23666G/s
-BM_DgemmOpenBLAS/64          19608 ns        19607 ns        35895 bytes_per_second=4.66942Gi/s items_per_second=26.74G/s
-BM_DgemmOpenBLAS/128        129020 ns        75756 ns         9312 bytes_per_second=4.83411Gi/s items_per_second=55.3663G/s
-BM_DgemmOpenBLAS/256        344133 ns       216261 ns         2587 bytes_per_second=6.77351Gi/s items_per_second=155.157G/s
-BM_DgemmOpenBLAS/512       1589663 ns      1212768 ns          638 bytes_per_second=4.83141Gi/s items_per_second=221.341G/s
-BM_DgemmOpenBLAS/1024     10371197 ns      9089042 ns           71 bytes_per_second=2.57865Gi/s items_per_second=236.272G/s
-BM_DgemmOpenBLAS/2048     73673349 ns     63063818 ns           11 bytes_per_second=1.48659Gi/s items_per_second=272.42G/s
-```
-
-```
-------------------------------------------------------------------------------------
-Benchmark                          Time             CPU   Iterations UserCounters...
-------------------------------------------------------------------------------------
-BM_DdotAccelerate/1024           109 ns          109 ns      6394972 items_per_second=9.42305G/s
-BM_DdotAccelerate/2048           125 ns          125 ns      5571252 items_per_second=16.3858G/s
-BM_DdotAccelerate/4096           168 ns          168 ns      4165774 items_per_second=24.3713G/s
-BM_DdotAccelerate/8192           246 ns          246 ns      2848632 items_per_second=33.3256G/s
-BM_DdotAccelerate/16384          408 ns          408 ns      1728165 items_per_second=40.1663G/s
-BM_DdotAccelerate/32768          725 ns          725 ns       934854 items_per_second=45.1869G/s
-BM_DdotAccelerate/65536         1360 ns         1360 ns       515274 items_per_second=48.1733G/s
-BM_DdotAccelerate/131072        2637 ns         2637 ns       265534 items_per_second=49.7119G/s
-BM_DdotAccelerate/262144        5279 ns         5270 ns       133399 items_per_second=49.7464G/s
-BM_DdotAccelerate/524288       10347 ns        10347 ns        67622 items_per_second=50.6702G/s
-BM_DdotAccelerate/1048576      51355 ns        51354 ns        13967 items_per_second=20.4185G/s
-BM_DdotAccelerate/2097152     326969 ns       326947 ns         2163 items_per_second=6.41434G/s
-BM_DdotAccelerate/4194304     691531 ns       689796 ns         1069 items_per_second=6.0805G/s
-BM_DgemmAccelerate/64           1628 ns         1616 ns       431287 bytes_per_second=56.659Gi/s items_per_second=324.465G/s
-BM_DgemmAccelerate/128         10633 ns        10633 ns        66063 bytes_per_second=34.4409Gi/s items_per_second=394.46G/s
-BM_DgemmAccelerate/256         79396 ns        79393 ns         8882 bytes_per_second=18.4504Gi/s items_per_second=422.635G/s
-BM_DgemmAccelerate/512        664003 ns       663994 ns         1043 bytes_per_second=8.82444Gi/s items_per_second=404.274G/s
-BM_DgemmAccelerate/1024      5498127 ns      5498128 ns          125 bytes_per_second=4.26281Gi/s items_per_second=390.585G/s
-BM_DgemmAccelerate/2048     46171703 ns     46171667 ns           15 bytes_per_second=2.03047Gi/s items_per_second=372.087G/s
-
+OPENBLAS_VERBOSE=2 ./build/cpp-simd-post-openblas
+Core: neoversen1
 ```
 
 ```
