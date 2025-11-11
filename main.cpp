@@ -34,6 +34,22 @@ inline void blas_dgemm(const std::vector<double> &A, const std::vector<double> &
                 C.data(), n);  // C and leading dimension of C
 }
 
+inline void blas_dgemv(const std::vector<double> &A, const std::vector<double> &x,
+                       std::vector<double> &y, size_t m, size_t n) {
+    cblas_dgemv(CblasRowMajor, CblasNoTrans,
+                m, n,
+                1.0,           // alpha
+                A.data(), n,   // A and leading dimension of A
+                x.data(), 1,   // x and stride
+                0.0,           // beta
+                y.data(), 1);  // y and stride
+}
+
+inline void blas_daxpy(const std::vector<double> &x, std::vector<double> &y, double alpha) {
+    int n = static_cast<int>(x.size());
+    cblas_daxpy(n, alpha, x.data(), 1, y.data(), 1);
+}
+
 // Macro to create benchmark function with dynamic naming
 #define BENCHMARK_DDOT(backend_name) \
 static void BM_Ddot_##backend_name(benchmark::State& state) { \
@@ -62,15 +78,49 @@ static void BM_Dgemm_##backend_name(benchmark::State& state) { \
 } \
 BENCHMARK(BM_Dgemm_##backend_name)->RangeMultiplier(2)->Range(1<<6, 1<<11);
 
+#define BENCHMARK_DGEMV(backend_name) \
+static void BM_Dgemv_##backend_name(benchmark::State& state) { \
+    size_t n = state.range(0); \
+    std::vector<double> A(n * n, 1.0); \
+    std::vector<double> x(n, 2.0); \
+    std::vector<double> y(n, 0.0); \
+    for (auto _ : state) { \
+        blas_dgemv(A, x, y, n, n); \
+        benchmark::DoNotOptimize(y.data()); \
+    } \
+    state.SetItemsProcessed(state.iterations() * 2 * n * n); \
+    state.SetBytesProcessed(state.iterations() * (n * n + 2 * n) * sizeof(double)); \
+} \
+BENCHMARK(BM_Dgemv_##backend_name)->RangeMultiplier(2)->Range(1<<6, 1<<13);
+
+#define BENCHMARK_DAXPY(backend_name) \
+static void BM_Daxpy_##backend_name(benchmark::State& state) { \
+    size_t n = state.range(0); \
+    std::vector<double> x(n, 1.0); \
+    std::vector<double> y(n, 2.0); \
+    double alpha = 3.0; \
+    for (auto _ : state) { \
+        blas_daxpy(x, y, alpha); \
+        benchmark::DoNotOptimize(y.data()); \
+    } \
+    state.SetItemsProcessed(state.iterations() * n); \
+    state.SetBytesProcessed(state.iterations() * 3 * n * sizeof(double)); \
+} \
+BENCHMARK(BM_Daxpy_##backend_name)->RangeMultiplier(2)->Range(1<<10, 1<<22);
+
 // Register benchmarks based on the selected backend
 #ifdef USE_ACCELERATE
 BENCHMARK_DDOT(Accelerate)
 BENCHMARK_DGEMM(Accelerate)
+BENCHMARK_DGEMV(Accelerate)
+BENCHMARK_DAXPY(Accelerate)
 #endif
 
 #ifdef USE_OPENBLAS
 BENCHMARK_DDOT(OpenBLAS)
 BENCHMARK_DGEMM(OpenBLAS)
+BENCHMARK_DGEMV(OpenBLAS)
+BENCHMARK_DAXPY(OpenBLAS)
 #endif
 
 BENCHMARK_MAIN();
