@@ -53,8 +53,77 @@ I built four benchmarks around some common double precision BLAS routines that a
 - `cblas_dgemv` - _a · **A** · x + b · y_ is a level 2 routine that handles matrix-vector multiplication. _a_, _b_ are scalars, *x*, *y* are vectors, and _**A**_ is a matrix. This routine is also common in iterative algorithms, but also in machine learning (linear regression), and signal processing.
 - `cblas_dgemm` - _a · **A** · **B** + b · **C**_ is a level 3 routine that handles matrix-matrix multiplication. _a_, _b_ are scalars, and _**A**_, _**B**_, _**C**_ are matrices. This routine is common in machine learning and graphics processing, for example.
 
-The benchmarks use Google's [benchmark](https://github.com/google/benchmark) library to measure performance.
+The benchmarks use Google's [benchmark](https://github.com/google/benchmark) library to measure performance. You can find the full code on [GitHub](https://github.com/frosnerd/cpp-simd-post). The following listing outlines the benchmark for `cblas_ddot` defined as a macro taking the name of the BLAS backend as an argument:
 
+```c++
+#define BENCHMARK_DDOT(backend_name) \
+static void BM_Ddot_##backend_name(benchmark::State& state) { \
+    size_t n = state.range(0); \
+    std::vector<double> x(n, 1.0); \
+    std::vector<double> y(n, 2.0); \
+    for (auto _ : state) { \
+        benchmark::DoNotOptimize(blas_ddot(x, y)); \
+    } \
+    state.SetItemsProcessed(state.iterations() * n); \
+} \
+BENCHMARK(BM_Ddot_##backend_name)->RangeMultiplier(2)->Range(1<<1, 1<<22);
+```
+
+We'll obtain the desired vector size `n` from the benchmark state. We'll initialize two vectors of the same size `x` and `y`. The `for (auto _ : state)` loop runs the function for the desired number of iterations. `benchmark::DoNotOptimize` is used to prevent the compiler from optimizing away the function call because the result is unused. We'll record the user metric number of items processed as the number of iterations times the vector size.
+
+We'll register the function as a benchmark using the `BENCHMARK` macro, defining the range of vector sizes to test, e.g. from 2<sup>2</sup> to 2<sup>22</sup> with a multiplier of 2. We can then generate the benchmarks by calling the macro with the desired backend name:
+
+```c++
+#ifdef USE_ACCELERATE
+BENCHMARK_DDOT(Accelerate)
+BENCHMARK_DGEMM(Accelerate)
+BENCHMARK_DGEMV(Accelerate)
+BENCHMARK_DAXPY(Accelerate)
+#endif
+```
+
+We'll repeat the same for OpenBLAS. In our `CMakeLists.txt` file we can then conditionally compile the two versions, or simply compile both versions at once:
+
+```cmake
+# ...
+option(BUILD_ACCELERATE "Build binary with Apple Accelerate framework (macOS only)" ON)
+option(BUILD_OPENBLAS "Build binary with OpenBLAS" ON)
+# ...
+if(BUILD_ACCELERATE AND APPLE)
+    add_executable(cpp-simd-post-accelerate ${SOURCES})
+    target_link_libraries(cpp-simd-post-accelerate PRIVATE benchmark::benchmark benchmark::benchmark_main)
+    target_link_libraries(cpp-simd-post-accelerate PRIVATE "-framework Accelerate")
+    target_compile_definitions(cpp-simd-post-accelerate PRIVATE ACCELERATE_NEW_LAPACK USE_ACCELERATE)
+    message(STATUS "Building cpp-simd-post-accelerate with Apple Accelerate framework")
+endif()
+# ...
+```
+
+When checking the resulting binaries, we can indeed see that they link to the respective libraries (assuming you installed them correctly on your system first):
+
+```
+$ otool -fahl build/cpp-simd-post-openblas | grep openblas -B5 -A5
+
+Load command 14
+          cmd LC_LOAD_DYLIB
+      cmdsize 80
+         name /opt/homebrew/opt/openblas/lib/libopenblas.0.dylib (offset 24)
+   time stamp 2 Thu Jan  1 01:00:02 1970
+      current version 0.0.0
+compatibility version 0.0.0
+```
+
+```
+$ otool -fahl build/cpp-simd-post-accelerate | grep Accelerate -B5 -A5
+
+Load command 14
+          cmd LC_LOAD_DYLIB
+      cmdsize 96
+         name /System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate (offset 24)
+   time stamp 2 Thu Jan  1 01:00:02 1970
+      current version 4.0.0
+compatibility version 1.0.0
+```
 
 ## Results
 
@@ -73,25 +142,3 @@ OPENBLAS_VERBOSE=2 ./build/cpp-simd-post-openblas
 Core: neoversen1
 ```
 
-```
-# otool -fahl build/cpp-simd-post-openblas | grep openblas -B5 -A5
-Load command 14
-          cmd LC_LOAD_DYLIB
-      cmdsize 80
-         name /opt/homebrew/opt/openblas/lib/libopenblas.0.dylib (offset 24)
-   time stamp 2 Thu Jan  1 01:00:02 1970
-      current version 0.0.0
-compatibility version 0.0.0
-```
-
-```
-# otool -fahl build/cpp-simd-post-accelerate | grep Accelerate -B5 -A5
-
-Load command 14
-          cmd LC_LOAD_DYLIB
-      cmdsize 96
-         name /System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate (offset 24)
-   time stamp 2 Thu Jan  1 01:00:02 1970
-      current version 4.0.0
-compatibility version 1.0.0
-```
