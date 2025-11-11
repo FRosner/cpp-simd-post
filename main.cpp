@@ -36,7 +36,7 @@ inline void blas_dgemm(const std::vector<double> &A, const std::vector<double> &
 
 // Macro to create benchmark function with dynamic naming
 #define BENCHMARK_DDOT(backend_name) \
-static void BM_Ddot##backend_name(benchmark::State& state) { \
+static void BM_Ddot_##backend_name(benchmark::State& state) { \
     size_t n = state.range(0); \
     std::vector<double> x(n, 1.0); \
     std::vector<double> y(n, 2.0); \
@@ -45,10 +45,10 @@ static void BM_Ddot##backend_name(benchmark::State& state) { \
     } \
     state.SetItemsProcessed(state.iterations() * n); \
 } \
-BENCHMARK(BM_Ddot##backend_name)->RangeMultiplier(2)->Range(1<<10, 1<<22);
+BENCHMARK(BM_Ddot_##backend_name)->RangeMultiplier(2)->Range(1<<10, 1<<22);
 
 #define BENCHMARK_DGEMM(backend_name) \
-static void BM_Dgemm##backend_name(benchmark::State& state) { \
+static void BM_Dgemm_##backend_name(benchmark::State& state) { \
     size_t n = state.range(0); \
     std::vector<double> A(n * n, 1.0); \
     std::vector<double> B(n * n, 2.0); \
@@ -60,7 +60,7 @@ static void BM_Dgemm##backend_name(benchmark::State& state) { \
     state.SetItemsProcessed(state.iterations() * 2 * n * n * n); \
     state.SetBytesProcessed(state.iterations() * 3 * n * n * sizeof(double)); \
 } \
-BENCHMARK(BM_Dgemm##backend_name)->RangeMultiplier(2)->Range(1<<6, 1<<11);
+BENCHMARK(BM_Dgemm_##backend_name)->RangeMultiplier(2)->Range(1<<6, 1<<11);
 
 // Register benchmarks based on the selected backend
 #ifdef USE_ACCELERATE

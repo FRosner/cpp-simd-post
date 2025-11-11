@@ -33,10 +33,10 @@
   },
   "benchmarks": [
     {
-      "name": "BM_DdotOpenBLAS/1024",
+      "name": "BM_Ddot_OpenBLAS/1024",
       "family_index": 0,
       "per_family_instance_index": 0,
-      "run_name": "BM_DdotOpenBLAS/1024",
+      "run_name": "BM_Ddot_OpenBLAS/1024",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -48,10 +48,10 @@
       "items_per_second": 7.8563787146795473e+09
     },
     {
-      "name": "BM_DdotOpenBLAS/2048",
+      "name": "BM_Ddot_OpenBLAS/2048",
       "family_index": 0,
       "per_family_instance_index": 1,
-      "run_name": "BM_DdotOpenBLAS/2048",
+      "run_name": "BM_Ddot_OpenBLAS/2048",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -63,10 +63,10 @@
       "items_per_second": 8.3408499170551338e+09
     },
     {
-      "name": "BM_DdotOpenBLAS/4096",
+      "name": "BM_Ddot_OpenBLAS/4096",
       "family_index": 0,
       "per_family_instance_index": 2,
-      "run_name": "BM_DdotOpenBLAS/4096",
+      "run_name": "BM_Ddot_OpenBLAS/4096",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -78,10 +78,10 @@
       "items_per_second": 8.5002504882191610e+09
     },
     {
-      "name": "BM_DdotOpenBLAS/8192",
+      "name": "BM_Ddot_OpenBLAS/8192",
       "family_index": 0,
       "per_family_instance_index": 3,
-      "run_name": "BM_DdotOpenBLAS/8192",
+      "run_name": "BM_Ddot_OpenBLAS/8192",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -93,10 +93,10 @@
       "items_per_second": 6.7228741974796486e+09
     },
     {
-      "name": "BM_DdotOpenBLAS/16384",
+      "name": "BM_Ddot_OpenBLAS/16384",
       "family_index": 0,
       "per_family_instance_index": 4,
-      "run_name": "BM_DdotOpenBLAS/16384",
+      "run_name": "BM_Ddot_OpenBLAS/16384",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -108,10 +108,10 @@
       "items_per_second": 1.1579802278499475e+09
     },
     {
-      "name": "BM_DdotOpenBLAS/32768",
+      "name": "BM_Ddot_OpenBLAS/32768",
       "family_index": 0,
       "per_family_instance_index": 5,
-      "run_name": "BM_DdotOpenBLAS/32768",
+      "run_name": "BM_Ddot_OpenBLAS/32768",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -123,10 +123,10 @@
       "items_per_second": 2.3700274000375333e+09
     },
     {
-      "name": "BM_DdotOpenBLAS/65536",
+      "name": "BM_Ddot_OpenBLAS/65536",
       "family_index": 0,
       "per_family_instance_index": 6,
-      "run_name": "BM_DdotOpenBLAS/65536",
+      "run_name": "BM_Ddot_OpenBLAS/65536",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -138,10 +138,10 @@
       "items_per_second": 4.7421374203817215e+09
     },
     {
-      "name": "BM_DdotOpenBLAS/131072",
+      "name": "BM_Ddot_OpenBLAS/131072",
       "family_index": 0,
       "per_family_instance_index": 7,
-      "run_name": "BM_DdotOpenBLAS/131072",
+      "run_name": "BM_Ddot_OpenBLAS/131072",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -153,10 +153,10 @@
       "items_per_second": 8.8076332492527599e+09
     },
     {
-      "name": "BM_DdotOpenBLAS/262144",
+      "name": "BM_Ddot_OpenBLAS/262144",
       "family_index": 0,
       "per_family_instance_index": 8,
-      "run_name": "BM_DdotOpenBLAS/262144",
+      "run_name": "BM_Ddot_OpenBLAS/262144",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -168,10 +168,10 @@
       "items_per_second": 1.5734927576884729e+10
     },
     {
-      "name": "BM_DdotOpenBLAS/524288",
+      "name": "BM_Ddot_OpenBLAS/524288",
       "family_index": 0,
       "per_family_instance_index": 9,
-      "run_name": "BM_DdotOpenBLAS/524288",
+      "run_name": "BM_Ddot_OpenBLAS/524288",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -183,10 +183,10 @@
       "items_per_second": 2.5104660506047993e+10
     },
     {
-      "name": "BM_DdotOpenBLAS/1048576",
+      "name": "BM_Ddot_OpenBLAS/1048576",
       "family_index": 0,
       "per_family_instance_index": 10,
-      "run_name": "BM_DdotOpenBLAS/1048576",
+      "run_name": "BM_Ddot_OpenBLAS/1048576",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -198,10 +198,10 @@
       "items_per_second": 3.4640444659754074e+10
     },
     {
-      "name": "BM_DdotOpenBLAS/2097152",
+      "name": "BM_Ddot_OpenBLAS/2097152",
       "family_index": 0,
       "per_family_instance_index": 11,
-      "run_name": "BM_DdotOpenBLAS/2097152",
+      "run_name": "BM_Ddot_OpenBLAS/2097152",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -213,10 +213,10 @@
       "items_per_second": 1.3131207017882093e+10
     },
     {
-      "name": "BM_DdotOpenBLAS/4194304",
+      "name": "BM_Ddot_OpenBLAS/4194304",
       "family_index": 0,
       "per_family_instance_index": 12,
-      "run_name": "BM_DdotOpenBLAS/4194304",
+      "run_name": "BM_Ddot_OpenBLAS/4194304",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -228,10 +228,10 @@
       "items_per_second": 9.6291438140338840e+09
     },
     {
-      "name": "BM_DgemmOpenBLAS/64",
+      "name": "BM_Dgemm_OpenBLAS/64",
       "family_index": 1,
       "per_family_instance_index": 0,
-      "run_name": "BM_DgemmOpenBLAS/64",
+      "run_name": "BM_Dgemm_OpenBLAS/64",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -244,10 +244,10 @@
       "items_per_second": 2.5643530978351902e+10
     },
     {
-      "name": "BM_DgemmOpenBLAS/128",
+      "name": "BM_Dgemm_OpenBLAS/128",
       "family_index": 1,
       "per_family_instance_index": 1,
-      "run_name": "BM_DgemmOpenBLAS/128",
+      "run_name": "BM_Dgemm_OpenBLAS/128",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -260,10 +260,10 @@
       "items_per_second": 6.2505566208854416e+10
     },
     {
-      "name": "BM_DgemmOpenBLAS/256",
+      "name": "BM_Dgemm_OpenBLAS/256",
       "family_index": 1,
       "per_family_instance_index": 2,
-      "run_name": "BM_DgemmOpenBLAS/256",
+      "run_name": "BM_Dgemm_OpenBLAS/256",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -276,10 +276,10 @@
       "items_per_second": 1.6111869151683051e+11
     },
     {
-      "name": "BM_DgemmOpenBLAS/512",
+      "name": "BM_Dgemm_OpenBLAS/512",
       "family_index": 1,
       "per_family_instance_index": 3,
-      "run_name": "BM_DgemmOpenBLAS/512",
+      "run_name": "BM_Dgemm_OpenBLAS/512",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -292,10 +292,10 @@
       "items_per_second": 2.2078284776210474e+11
     },
     {
-      "name": "BM_DgemmOpenBLAS/1024",
+      "name": "BM_Dgemm_OpenBLAS/1024",
       "family_index": 1,
       "per_family_instance_index": 4,
-      "run_name": "BM_DgemmOpenBLAS/1024",
+      "run_name": "BM_Dgemm_OpenBLAS/1024",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
@@ -308,10 +308,10 @@
       "items_per_second": 2.2745373841334265e+11
     },
     {
-      "name": "BM_DgemmOpenBLAS/2048",
+      "name": "BM_Dgemm_OpenBLAS/2048",
       "family_index": 1,
       "per_family_instance_index": 5,
-      "run_name": "BM_DgemmOpenBLAS/2048",
+      "run_name": "BM_Dgemm_OpenBLAS/2048",
       "run_type": "iteration",
       "repetitions": 1,
       "repetition_index": 0,
