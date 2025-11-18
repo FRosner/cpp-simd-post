@@ -65,6 +65,12 @@ def plot_data(y_label):
         ticks = 2 ** np.arange(min_exp, max_exp + 1)
         plt.xticks(ticks)
 
+        if family == "ddot":
+            # https://github.com/OpenMathLib/OpenBLAS/blob/f6df9bebbb4259aa61ab5634c0f1269fb152cc0e/kernel/arm64/dot.c#L85-L102
+            vline_positions = [10000]
+            for pos in vline_positions:
+                plt.axvline(x=pos, color='red', linestyle='-', alpha=0.7, linewidth=1)
+
         plt.legend()
         plt.grid(True, which="both", ls="--")
         plt.tight_layout()
